@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
           RecommendationPage(), // Swipe left
           Center(
             child: Text(
-              "Add Camera",
+              "Upload Video",
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ), // Main page
