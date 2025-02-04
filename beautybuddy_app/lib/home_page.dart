@@ -41,7 +41,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadModel() async {
-    _interpreter = await tfl.Interpreter.fromAsset('assets/emotion_model.tflite');
+    try {
+      _interpreter = await tfl.Interpreter.fromAsset('assets/emotion_model.tflite');
+      print("Model loaded successfully!");
+    } catch (e) {
+      print("Error loading model: $e");
+    }
   }
 
   Future<void> _analyzeImage(CameraImage image) async {
@@ -60,7 +65,10 @@ class _HomePageState extends State<HomePage> {
 
   String _mapEmotionLabel(int index) {
     const emotions = ['Happy', 'Sad', 'Nervous', 'Angry', 'Neutral'];
-    return emotions[index];
+    if (index >= 0 && index < emotions.length) {
+      return emotions[index];
+    }
+    return "Unknown";
   }
 
   @override

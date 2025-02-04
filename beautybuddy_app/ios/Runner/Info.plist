@@ -2,8 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library for saving pictures.</string>
+
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need access to save images to your photo library.</string>
     <key>NSCameraUsageDescription</key>
-    <string>We need access to your camera for emotion detection</string>
+    <string>We need access to your camera for emotion detection.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>We need microphone access in case of future audio processing.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
