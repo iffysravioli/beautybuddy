@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'RecommendationAnalysisPage.dart'; // <-- Create this page to handle logic
 
 class RecommendationPage extends StatefulWidget {
   @override
@@ -17,56 +18,65 @@ class _RecommendationPageState extends State<RecommendationPage> {
     {'emoji': '🏫', 'label': 'School'},
   ];
 
+  String? selectedOccasion;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF3E1F0D), Color(0xFFD4A373)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
+      backgroundColor: const Color(0xFF3E1F0D),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Image.asset(
-                          'assets/images/beauty_background.png',
-                          height: 80,
+              Center(
+                child: Image.asset(
+                  'assets/images/beauty_background.png',
+                  height: 80,
+                ),
+              ),
+              const SizedBox(height: 30),
+              _buildSectionTitle("Rate your happiness"),
+              const SizedBox(height: 10),
+              _buildHappinessRow(),
+              const SizedBox(height: 20),
+              _buildSectionTitle("How does the weather feel?"),
+              _buildDropdown(),
+              const SizedBox(height: 20),
+              _buildSectionTitle("Pick an occasion"),
+              const SizedBox(height: 10),
+              _buildOccasionSwiper(),
+              const SizedBox(height: 30),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    if (selectedHappinessIndex != null &&
+                        selectedWeather != null &&
+                        selectedOccasion != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecommendationAnalysisPage(
+                            weather: selectedWeather!,
+                            happinessLevel: selectedHappinessIndex!,
+                            occasion: selectedOccasion!, // Add this var
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 30),
-                      _buildSectionTitle("Tell me your mood"),
-                      _buildTextField("Type your mood here..."),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle("Rate your happiness"),
-                      const SizedBox(height: 10),
-                      _buildHappinessRow(),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle("How does the weather feel?"),
-                      _buildDropdown(),
-                      if (selectedWeather != null) ...[
-                        const SizedBox(height: 10),
-                        Text(
-                          "You selected: $selectedWeather",
-                          style: const TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ],
-                      const SizedBox(height: 20),
-                      _buildSectionTitle("Pick an occasion"),
-                      const SizedBox(height: 10),
-                      _buildOccasionSwiper(),
-                    ],
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF3E1F0D),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    'Get My Color Recommendation',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -84,21 +94,6 @@ class _RecommendationPageState extends State<RecommendationPage> {
         fontSize: 22,
         fontWeight: FontWeight.bold,
         color: Colors.white,
-      ),
-    );
-  }
-
-  Widget _buildTextField(String hint) {
-    return TextField(
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white24,
-        hintText: hint,
-        hintStyle: const TextStyle(color: Colors.white70),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
       ),
     );
   }
@@ -178,7 +173,7 @@ class _RecommendationPageState extends State<RecommendationPage> {
 
   Widget _buildOccasionSwiper() {
     return SizedBox(
-      height: 100,
+      height: 140,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: occasions.length,
@@ -186,25 +181,34 @@ class _RecommendationPageState extends State<RecommendationPage> {
         itemBuilder: (context, index) {
           final emoji = occasions[index]['emoji']!;
           final label = occasions[index]['label']!;
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(12),
+          final isSelected = selectedOccasion == label;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedOccasion = label;
+              });
+            },
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white : Colors.white24,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    emoji,
+                    style: const TextStyle(fontSize: 28),
+                  ),
                 ),
-                child: Text(
-                  emoji,
-                  style: const TextStyle(fontSize: 28),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  style: const TextStyle(color: Colors.white),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
+              ],
+            ),
           );
         },
       ),

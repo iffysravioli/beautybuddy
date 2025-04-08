@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
-
+import 'ShareResultPage.dart';
 class UndertoneInfoPage extends StatefulWidget {
   final File imageFile;
   final List<Color> palette;
@@ -22,6 +22,7 @@ class UndertoneInfoPage extends StatefulWidget {
 class _UndertoneInfoPageState extends State<UndertoneInfoPage> {
   String undertone = 'Analyzing...';
   File? croppedFace;
+  Color selectedColor = Colors.white;
 
   @override
   void initState() {
@@ -57,7 +58,6 @@ class _UndertoneInfoPageState extends State<UndertoneInfoPage> {
     final croppedPath = '${tempDir.path}/cropped_face_${DateTime.now().millisecondsSinceEpoch}.png';
     final resultFile = File(croppedPath)..writeAsBytesSync(img.encodePng(whiteBg));
 
-    // Sample the center pixel
     final sampleX = croppedImg.width ~/ 2;
     final sampleY = croppedImg.height ~/ 2;
     final pixel = croppedImg.getPixelSafe(sampleX, sampleY);
@@ -101,31 +101,7 @@ class _UndertoneInfoPageState extends State<UndertoneInfoPage> {
               ),
             ),
             const SizedBox(height: 10),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              alignment: WrapAlignment.center,
-              children: widget.palette.map((color) {
-                return Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: color,
-                    border: Border.all(color: Colors.black12),
-                  ),
-                );
-              }).toList(),
-            ),
             const SizedBox(height: 20),
-            Text(
-              'Your undertone: $undertone',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Serif',
-              ),
-            ),
             const SizedBox(height: 20),
             const Text(
               'Recommended Palette',
@@ -142,21 +118,28 @@ class _UndertoneInfoPageState extends State<UndertoneInfoPage> {
                 children: widget.palette
                     .skip(i * 5)
                     .take(5)
-                    .map((color) => Container(
-                  width: 40,
-                  height: 40,
-                  margin: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black12),
+                    .map((color) => GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      selectedColor = color;
+                    });
+                  },
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black12),
+                    ),
                   ),
                 ))
                     .toList(),
               ),
             const SizedBox(height: 20),
             const Text(
-              'How You Look with White Background',
+              'Preview with Selected Color',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -165,16 +148,55 @@ class _UndertoneInfoPageState extends State<UndertoneInfoPage> {
             ),
             const SizedBox(height: 8),
             croppedFace != null
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.file(
-                croppedFace!,
-                width: 120,
-                height: 120,
-                fit: BoxFit.cover,
+                ? Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: selectedColor,
+              ),
+              padding: const EdgeInsets.all(60),
+              child: ClipOval(
+                child: Image.file(
+                  croppedFace!,
+                  fit: BoxFit.cover,
+                ),
               ),
             )
                 : const CircularProgressIndicator(),
+
+            Text(
+              'Your undertone: $undertone',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Serif',
+              ),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ShareResultPage(
+                      croppedFace: croppedFace!,
+                      undertone: undertone,
+                      palette: widget.palette,
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.ios_share),
+              label: const Text('Share Your Analysis'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B2213),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
           ],
         ),
       ),

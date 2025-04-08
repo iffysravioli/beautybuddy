@@ -46,10 +46,10 @@ class DashboardPage extends StatelessWidget {
 
               // Buttons
               _buildGradientButton(context, 'My Profile', '/profile'),
-              _buildGradientButton(context, 'New Analysis', '/analysis'),
+              _buildGradientButton(context, 'Camera', '/camera'),
+              _buildGradientButton(context, 'Text Analysis', '/analysis'),
               _buildGradientButton(context, 'History', '/history'),
               _buildGradientButton(context, 'Favorites', '/favorites'),
-              _buildGradientButton(context, 'Test', '/test'),
             ],
           ),
         ),
