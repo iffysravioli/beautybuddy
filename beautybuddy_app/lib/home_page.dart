@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
-import 'dart:typed_data';
+import 'camera_service.dart';
+import 'image_processing.dart';
 import 'recommendation_page.dart';
 import 'favorites_page.dart';
+import 'dart:io';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,71 +12,39 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  CameraController? _cameraController;
-  late tfl.Interpreter _interpreter;
+  final CameraService _cameraService = CameraService();
+  final ImageProcessing _imageProcessing = ImageProcessing();
   String _emotion = "Detecting...";
+  File? _capturedImage;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
-    _loadModel();
+    _initializeServices();
   }
 
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    if (cameras.isEmpty) {
-      print("No cameras available");
-      return;
+  Future<void> _initializeServices() async {
+    await _cameraService.initializeCamera();
+    await _imageProcessing.loadModel();
+    setState(() {});
+  }
+
+  Future<void> _takePicture() async {
+    final XFile? imageFile = await _cameraService.takePicture();
+    if (imageFile != null) {
+      setState(() {
+        _capturedImage = File(imageFile.path);
+      });
+
+      // Show image for 2 seconds before processing
+      await Future.delayed(Duration(seconds: 2));
+
+      final emotion = await _imageProcessing.detectFaceAndEmotion(imageFile);
+      setState(() {
+        _emotion = "Your expression: $emotion";
+        _capturedImage = null; // Hide image after processing
+      });
     }
-
-    _cameraController = CameraController(cameras[0], ResolutionPreset.medium);
-
-    try {
-      await _cameraController!.initialize();
-      if (!mounted) return;
-      setState(() {});
-    } catch (e) {
-      print("Error initializing camera: $e");
-    }
-  }
-
-  Future<void> _loadModel() async {
-    try {
-      _interpreter = await tfl.Interpreter.fromAsset('assets/emotion_model.tflite');
-      print("Model loaded successfully!");
-    } catch (e) {
-      print("Error loading model: $e");
-    }
-  }
-
-  Future<void> _analyzeImage(CameraImage image) async {
-    if (_interpreter == null) return;
-    Uint8List inputBytes = _convertImageToByteList(image);
-    var output = List.filled(1, 0).reshape([1, 1]);
-    _interpreter.run(inputBytes, output);
-    setState(() {
-      _emotion = _mapEmotionLabel(output[0][0]);
-    });
-  }
-
-  Uint8List _convertImageToByteList(CameraImage image) {
-    return image.planes[0].bytes;
-  }
-
-  String _mapEmotionLabel(int index) {
-    const emotions = ['Happy', 'Sad', 'Nervous', 'Angry', 'Neutral'];
-    if (index >= 0 && index < emotions.length) {
-      return emotions[index];
-    }
-    return "Unknown";
-  }
-
-  @override
-  void dispose() {
-    _cameraController?.dispose();
-    _interpreter.close();
-    super.dispose();
   }
 
   @override
@@ -86,19 +55,22 @@ class _HomePageState extends State<HomePage> {
           RecommendationPage(),
           Stack(
             children: [
-              if (_cameraController == null || !_cameraController!.value.isInitialized)
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 20),
-                      Text("Loading camera...", style: TextStyle(fontSize: 18)),
-                    ],
-                  ),
-                )
+              if (_cameraService.cameraController == null || !_cameraService.cameraController!.value.isInitialized)
+                Center(child: CircularProgressIndicator())
               else
-                CameraPreview(_cameraController!),
+                CameraPreview(_cameraService.cameraController!),
+
+              // Show captured image temporarily
+              if (_capturedImage != null)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.6), // Semi-transparent overlay
+                    child: Center(
+                      child: Image.file(_capturedImage!, fit: BoxFit.contain),
+                    ),
+                  ),
+                ),
+
               Positioned(
                 top: 50,
                 left: 20,
@@ -118,29 +90,23 @@ class _HomePageState extends State<HomePage> {
                 bottom: 50,
                 left: MediaQuery.of(context).size.width / 2 - 30,
                 child: FloatingActionButton(
-                  onPressed: () async {
-                    await _takePicture();
-                  },
-                  child: Icon(Icons.camera),
+                  onPressed: _takePicture,
+                  child: Icon(Icons.camera_alt),
                 ),
-              )
+              ),
+              Positioned(
+                bottom: 50,
+                right: 20,
+                child: FloatingActionButton(
+                  onPressed: _cameraService.switchCamera,
+                  child: Icon(Icons.flip_camera_ios),
+                ),
+              ),
             ],
           ),
           FavoritesPage(),
         ],
-        onPageChanged: (index) {
-          print("Page changed to index: $index");
-        },
       ),
     );
-  }
-
-  Future<void> _takePicture() async {
-    try {
-      final image = await _cameraController!.takePicture();
-      print("Picture taken: ${image.path}");
-    } catch (e) {
-      print("Error taking picture: $e");
-    }
   }
 }
