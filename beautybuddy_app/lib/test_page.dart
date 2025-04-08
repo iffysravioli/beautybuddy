@@ -20,6 +20,7 @@ class _TestPageState extends State<TestPage> {
   String _emotionResult = 'Waiting for input...';
   late FaceDetector _faceDetector;
   bool _isProcessing = false;
+  Rect? _detectedFaceRect;
 
   @override
   void initState() {
@@ -94,11 +95,12 @@ class _TestPageState extends State<TestPage> {
 
     setState(() {
       _emotionResult = 'Detected: $emotion';
-      _statusMessage = '✅ Face detected';
+      _statusMessage = '';
     });
 
     await Future.delayed(const Duration(seconds: 1)); // Limit analysis rate
     _isProcessing = false;
+    _detectedFaceRect = face.boundingBox;
   }
 
   InputImage? _inputImageFromCameraImage(CameraImage image) {
@@ -183,28 +185,29 @@ class _TestPageState extends State<TestPage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 20.0),
               child: ElevatedButton.icon(
-                onPressed: _emotionResult.contains('Detected:')
-                    ? () async {
-                  try {
-                    final file = await _cameraController.takePicture();
-                    final imageFile = File(file.path);
+                onPressed: _emotionResult.contains('Detected:') && _detectedFaceRect != null
+                  ? () async {
+                try {
+                  final file = await _cameraController.takePicture();
+                  final imageFile = File(file.path);
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AnalysisResultPage(
-                          imageFile: imageFile,
-                          emotion: _emotionResult,
-                        ),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AnalysisResultPage(
+                        imageFile: imageFile,
+                        emotion: _emotionResult,
+                        faceRect: _detectedFaceRect!, // ✅ now using stored face
                       ),
-                    );
-                  } catch (e) {
-                    setState(() {
-                      _statusMessage = '❌ Failed to capture for analysis.';
-                    });
-                  }
+                    ),
+                  );
+                } catch (e) {
+                  setState(() {
+                    _statusMessage = '❌ Failed to capture for analysis.';
+                  });
                 }
-                    : null,
+              }
+                  : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B2213),
                   foregroundColor: Colors.white,

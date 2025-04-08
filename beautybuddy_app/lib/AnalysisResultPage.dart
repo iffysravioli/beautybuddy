@@ -1,18 +1,21 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
-// import 'undertone_info_page.dart'; // <-- You'll create this next
+import 'UndertoneInfoPage.dart'; // <-- You'll create this next
 
 class AnalysisResultPage extends StatefulWidget {
   final File imageFile;
   final String emotion;
 
+
+  final Rect faceRect;
+
   const AnalysisResultPage({
     super.key,
     required this.imageFile,
     required this.emotion,
+    required this.faceRect,
   });
-
   @override
   State<AnalysisResultPage> createState() => _AnalysisResultPageState();
 }
@@ -135,32 +138,33 @@ class _AnalysisResultPageState extends State<AnalysisResultPage> {
             }).toList(),
           ),
           const SizedBox(height: 24),
-          // Padding(
-          //   padding: const EdgeInsets.only(bottom: 24.0),
-          //   child: ElevatedButton.icon(
-          //     onPressed: _palette.isNotEmpty
-          //         ? () {
-          //       Navigator.push(
-          //         context,
-          //         MaterialPageRoute(
-          //           builder: (_) => UndertoneInfoPage(
-          //             imageFile: widget.imageFile,
-          //             palette: _palette,
-          //           ),
-          //         ),
-          //       );
-          //     }
-          //         : null,
-          //     icon: const Icon(Icons.palette),
-          //     label: const Text("View Your Color Palette & Undertone Analysis"),
-          //     style: ElevatedButton.styleFrom(
-          //       backgroundColor: const Color(0xFF3B2213),
-          //       foregroundColor: Colors.white,
-          //       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          //     ),
-          //   ),
-          // ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 24.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UndertoneInfoPage(
+                      imageFile: widget.imageFile,
+                      palette: _palette,
+                      faceRect: widget.faceRect, // ✅ <--- include this
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B2213),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text('View your color palette and undertone analysis'),
+            ),
+          ),
+
         ],
       ),
     );
