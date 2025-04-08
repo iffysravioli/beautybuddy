@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
-import 'AnalysisResultPage.dart';
+import '../AnalysisResultPage.dart';
 
 class CameraSystem extends StatefulWidget {
   const CameraSystem({super.key});

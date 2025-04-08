@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dashboard_page.dart';
-import 'favorites_page.dart';
-import 'history_page.dart';
-import 'camera_page.dart';
-import 'recommendation_page.dart';
-
+import 'color_pallets/favorites_page.dart';
+import 'color_pallets/history_page.dart';
+import 'photo_analysis/camera_page.dart';
+import 'text_analysis/recommendation_page.dart';
+import 'extra_video_text/video_page.dart';
 
 class MyProfilePage extends StatelessWidget {
   @override
@@ -31,6 +31,7 @@ class BeautyBuddyApp extends StatelessWidget {
         '/history': (context) => HistoryPage(),
         '/favorites': (context) => FavoritesPage(),
         '/camera': (context) => CameraSystem(),
+        // '/video': (context) =>  VideoPage(),
       },
     );
   }

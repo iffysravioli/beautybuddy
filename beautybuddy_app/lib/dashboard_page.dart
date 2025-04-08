@@ -45,11 +45,13 @@ class DashboardPage extends StatelessWidget {
               const SizedBox(height: 40),
 
               // Buttons
-              _buildGradientButton(context, 'My Profile', '/profile'),
+              // _buildGradientButton(context, 'My Profile', '/profile'),
               _buildGradientButton(context, 'Camera', '/camera'),
               _buildGradientButton(context, 'Text Analysis', '/analysis'),
               _buildGradientButton(context, 'History', '/history'),
               _buildGradientButton(context, 'Favorites', '/favorites'),
+              // _buildGradientButton(context, 'Video', '/video'),
+
             ],
           ),
         ),

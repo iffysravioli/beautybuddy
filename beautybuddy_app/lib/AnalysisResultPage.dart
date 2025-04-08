@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
-import 'UndertoneInfoPage.dart'; // <-- You'll create this next
+import 'photo_analysis/UndertoneInfoPage.dart'; // <-- You'll create this next
 
 class AnalysisResultPage extends StatefulWidget {
   final File imageFile;
@@ -148,7 +148,7 @@ class _AnalysisResultPageState extends State<AnalysisResultPage> {
                     builder: (context) => UndertoneInfoPage(
                       imageFile: widget.imageFile,
                       palette: _palette,
-                      faceRect: widget.faceRect, // ✅ <--- include this
+                      faceRect: widget.faceRect,
                     ),
                   ),
                 );
