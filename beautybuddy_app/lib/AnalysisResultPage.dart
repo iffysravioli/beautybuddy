@@ -39,8 +39,6 @@ class _AnalysisResultPageState extends State<AnalysisResultPage> {
     for (int dx = -30; dx <= 30; dx++) {
       for (int dy = -30; dy <= 30; dy++) {
         final pixel = image.getPixelSafe(centerX + dx, centerY + dy);
-
-// Use `.r`, `.g`, `.b` directly from Pixel object
         r += pixel.r.toInt();
         g += pixel.g.toInt();
         b += pixel.b.toInt();
@@ -50,21 +48,41 @@ class _AnalysisResultPageState extends State<AnalysisResultPage> {
 
     final avgColor = Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
 
-    List<Color> shades = List.generate(10, (i) {
-      final factor = (i - 5) * 10;
-      return Color.fromARGB(
-        255,
-        (avgColor.red + factor).clamp(0, 255),
-        (avgColor.green + factor ~/ 2).clamp(0, 255),
-        (avgColor.blue + factor ~/ 2).clamp(0, 255),
-      );
-    });
+    // === Step 1: Convert RGB -> HSL ===
+    final hsl = HSLColor.fromColor(avgColor);
+    double baseHue = hsl.hue;
+    double lightness = hsl.lightness;
+    double saturation = hsl.saturation;
+
+    // === Step 2: Use emotion to shift hue ===
+    List<double> hueShifts;
+
+    if (widget.emotion.contains('Happy')) {
+      hueShifts = [-30, 0, 30, 60, 90]; // analogous + complementary
+    } else if (widget.emotion.contains('Tired')) {
+      hueShifts = [-90, -60, -30, 0, 30]; // calming shades
+    } else if (widget.emotion.contains('Serious')) {
+      hueShifts = [-180, -150, 0, 150, 180]; // more formal contrasts
+    } else {
+      hueShifts = [-60, -30, 0, 30, 60]; // neutral blend
+    }
+
+    // === Step 3: Generate colors ===
+    List<Color> shades = hueShifts.map((shift) {
+      final newHue = (baseHue + shift) % 360;
+      return HSLColor.fromAHSL(1.0, newHue, saturation, lightness).toColor();
+    }).toList();
+
+    // Add mid-tone variants (lighter/darker)
+    List<Color> finalPalette = [
+      ...shades.map((color) => HSLColor.fromColor(color).withLightness((lightness * 0.85).clamp(0.0, 1.0)).toColor()),
+      ...shades.map((color) => HSLColor.fromColor(color).withLightness((lightness * 1.15).clamp(0.0, 1.0)).toColor()),
+    ];
 
     setState(() {
-      _palette = shades;
+      _palette = finalPalette;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
