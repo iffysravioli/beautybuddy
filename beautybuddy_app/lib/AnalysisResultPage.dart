@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+// import 'undertone_info_page.dart'; // <-- You'll create this next
 
 class AnalysisResultPage extends StatefulWidget {
   final File imageFile;
@@ -47,42 +48,38 @@ class _AnalysisResultPageState extends State<AnalysisResultPage> {
     }
 
     final avgColor = Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
-
-    // === Step 1: Convert RGB -> HSL ===
     final hsl = HSLColor.fromColor(avgColor);
     double baseHue = hsl.hue;
     double lightness = hsl.lightness;
     double saturation = hsl.saturation;
 
-    // === Step 2: Use emotion to shift hue ===
     List<double> hueShifts;
 
     if (widget.emotion.contains('Happy')) {
-      hueShifts = [-30, 0, 30, 60, 90]; // analogous + complementary
+      hueShifts = [-30, 0, 30, 60, 90];
     } else if (widget.emotion.contains('Tired')) {
-      hueShifts = [-90, -60, -30, 0, 30]; // calming shades
+      hueShifts = [-90, -60, -30, 0, 30];
     } else if (widget.emotion.contains('Serious')) {
-      hueShifts = [-180, -150, 0, 150, 180]; // more formal contrasts
+      hueShifts = [-180, -150, 0, 150, 180];
     } else {
-      hueShifts = [-60, -30, 0, 30, 60]; // neutral blend
+      hueShifts = [-60, -30, 0, 30, 60];
     }
 
-    // === Step 3: Generate colors ===
     List<Color> shades = hueShifts.map((shift) {
       final newHue = (baseHue + shift) % 360;
       return HSLColor.fromAHSL(1.0, newHue, saturation, lightness).toColor();
     }).toList();
 
-    // Add mid-tone variants (lighter/darker)
     List<Color> finalPalette = [
-      ...shades.map((color) => HSLColor.fromColor(color).withLightness((lightness * 0.85).clamp(0.0, 1.0)).toColor()),
-      ...shades.map((color) => HSLColor.fromColor(color).withLightness((lightness * 1.15).clamp(0.0, 1.0)).toColor()),
+      ...shades.map((c) => HSLColor.fromColor(c).withLightness((lightness * 0.85).clamp(0.0, 1.0)).toColor()),
+      ...shades.map((c) => HSLColor.fromColor(c).withLightness((lightness * 1.15).clamp(0.0, 1.0)).toColor()),
     ];
 
     setState(() {
       _palette = finalPalette;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -138,6 +135,32 @@ class _AnalysisResultPageState extends State<AnalysisResultPage> {
             }).toList(),
           ),
           const SizedBox(height: 24),
+          // Padding(
+          //   padding: const EdgeInsets.only(bottom: 24.0),
+          //   child: ElevatedButton.icon(
+          //     onPressed: _palette.isNotEmpty
+          //         ? () {
+          //       Navigator.push(
+          //         context,
+          //         MaterialPageRoute(
+          //           builder: (_) => UndertoneInfoPage(
+          //             imageFile: widget.imageFile,
+          //             palette: _palette,
+          //           ),
+          //         ),
+          //       );
+          //     }
+          //         : null,
+          //     icon: const Icon(Icons.palette),
+          //     label: const Text("View Your Color Palette & Undertone Analysis"),
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: const Color(0xFF3B2213),
+          //       foregroundColor: Colors.white,
+          //       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
