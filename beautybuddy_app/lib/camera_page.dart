@@ -6,14 +6,14 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:google_mlkit_commons/google_mlkit_commons.dart';
 import 'AnalysisResultPage.dart';
 
-class TestPage extends StatefulWidget {
-  const TestPage({super.key});
+class CameraSystem extends StatefulWidget {
+  const CameraSystem({super.key});
 
   @override
-  State<TestPage> createState() => _TestPageState();
+  State<CameraSystem> createState() => _CameraSystem();
 }
 
-class _TestPageState extends State<TestPage> {
+class _CameraSystem extends State<CameraSystem> {
   late CameraController _cameraController;
   bool _isCameraInitialized = false;
   String _statusMessage = 'Initializing camera...';
